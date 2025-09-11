@@ -3,8 +3,6 @@ import json
 import time
 import os
 from pathlib import Path
-import sys
-sys.path.append('/Users/kichul/Documents/project/dart-disclosure-viewer')
 from utils import date_utils
 from api.api_config import API_KEY
 

@@ -5,8 +5,6 @@ This module provides functions for determining and managing report periods
 for financial statement data from DART.
 """
 
-import sys
-sys.path.append('/Users/kichul/Documents/project/dart-disclosure-viewer')
 from utils import date_utils
 
 # DART report code mappings

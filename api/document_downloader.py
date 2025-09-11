@@ -7,8 +7,6 @@ from the DART system.
 
 import time
 from pathlib import Path
-import sys
-sys.path.append('/Users/kichul/Documents/project/dart-disclosure-viewer')
 from api import dart_api
 
 def get_downloads_folder():
