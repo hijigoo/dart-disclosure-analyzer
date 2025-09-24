@@ -20,6 +20,9 @@ class_diagram.png
 download/
 *.zip
 
+# Data files
+data/
+
 # Python
 __pycache__/
 *.py[cod]

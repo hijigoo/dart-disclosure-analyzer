@@ -3,8 +3,9 @@ import json
 import time
 import os
 from pathlib import Path
+from datetime import datetime, timedelta
 from utils import date_utils
-from api.api_config import API_KEY
+from config.api_config import API_KEY
 
 # OpenDART API status codes
 DART_STATUS_CODES = {
@@ -68,31 +69,34 @@ def validate_api_key():
 
 # 공시검색 개발가이드
 # https://opendart.fss.or.kr/guide/detail.do?apiGrpCd=DS001&apiId=2019001
-def get_disclosure_list(corp_code, days_back=30):
+def get_disclosure_list(corp_code, start_date=20250901, end_date=20250931, page_count=100, pblntf_ty=None):
     """
     Fetch a list of recent disclosures for a specific company
     
     Args:
         corp_code: Company code
         days_back: How many days back to search (default: 30)
-        
+        pblntf_ty: 공시 유형
     Returns:
         List of disclosure documents
     """
     url = f'{BASE_URL}/list.json'
     
     # Calculate date range (from X days ago until today)
-    end_date = date_utils.get_current_date()  # Today in YYYYMMDD format
-    start_date = date_utils.get_date_before(days_back)
+    # end_date = date_utils.get_current_date()  # Today in YYYYMMDD format
+    # start_date = date_utils.get_date_before(days_back)
     
     params = {
         'crtfc_key': API_KEY,
         'corp_code': corp_code,
         'bgn_de': start_date,
         'end_de': end_date,
-        'page_count': 100  # Allow up to 100 results
+        'page_count': page_count  # Allow up to 100 results
     }
     
+    if pblntf_ty:
+        params['pblntf_ty'] = pblntf_ty
+
     print(f"Fetching disclosures from {start_date} to {end_date}...")
     
     response = requests.get(url, params=params, timeout=10)
@@ -201,16 +205,15 @@ def get_financial_statement(corp_code, bsns_year, reprt_code, fs_div='CFS', max_
     raise DartAPIError(f"Failed to load business report after {max_retries} attempts")
 
 
-# 공시서류원본파일 개발가이드
-# https://opendart.fss.or.kr/guide/detail.do?apiGrpCd=DS001&apiId=2019003
+
 def download_document(rcept_no, save_path=None):
     """
     Download the original disclosure document as a zip file
-    
+
     Args:
         rcept_no: The receipt number of the disclosure document
         save_path: Path to save the downloaded file (optional)
-        
+
     Returns:
         Path to the saved file or None if download failed
     """

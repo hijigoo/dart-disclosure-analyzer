@@ -6,10 +6,10 @@ disclosure information for Samsung Electronics from the Korean Financial
 Supervisory Service's DART system.
 """
 
-from api.api_config import SAMSUNG_CORP_CODE
+from config.api_config import SAMSUNG_CORP_CODE
 from api import dart_api
-from display import display
-from utils import date_utils
+from service import dart_service
+from utils import date_utils, display, csv_utils
 
 def main():
     """
@@ -26,11 +26,23 @@ def main():
             
         # Fetch Samsung disclosures from the last 30 days
         print("Fetching recent disclosures for Samsung Electronics...")
-        disclosures = dart_api.get_disclosure_list(SAMSUNG_CORP_CODE, 30)
+
+        end_date = date_utils.get_current_date()  # Today
+        start_date = date_utils.get_january_first()  # Start Date
+
+        disclosures = dart_service.get_disclosure_list_by_date_range(
+            corp_code=SAMSUNG_CORP_CODE,
+            start_date=start_date,
+            end_date=end_date,
+            page_count=100,
+            pblntf_ty='I'
+        )
         
         # Display the results using the display module
         display.display_recent_disclosures(disclosures)
-        
+        # Download the results using the csv module
+        csv_utils.save_disclosures_to_csv(disclosures=disclosures)
+
     except dart_api.DartAPIError as e:
         print(f'API Error: {e}')
     except Exception as e:

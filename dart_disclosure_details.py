@@ -6,9 +6,9 @@ disclosure documents for Samsung Electronics from the Korean Financial
 Supervisory Service's DART system.
 """
 
-from api.api_config import SAMSUNG_CORP_CODE
+from config.api_config import SAMSUNG_CORP_CODE
 from api import dart_api, report_period, document_downloader
-from display import display
+from utils import display
 
 def main():
     """Main function for Samsung disclosure details tool"""
