@@ -11,7 +11,7 @@ import json
 from datetime import datetime
 from pathlib import Path
 
-def ensure_data_directory():
+def ensure_download_directory():
     """
     Ensure that the data directory exists
 
@@ -20,7 +20,7 @@ def ensure_data_directory():
     """
     # Create path to data directory at the root of the project
     project_root = Path(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-    data_dir = project_root / 'data'
+    data_dir = project_root / 'download'
 
     # Create directory if it doesn't exist
     if not data_dir.exists():
@@ -45,7 +45,7 @@ def save_disclosures_to_csv(disclosures, filename=None):
         return None
 
     # Ensure the data directory exists
-    data_dir = ensure_data_directory()
+    data_dir = ensure_download_directory()
 
     # Generate a default filename if not provided
     if not filename:

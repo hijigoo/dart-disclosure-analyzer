@@ -49,14 +49,14 @@ def extract_zip_file(zip_path, extract_path=None, delete_zip=False):
             file_list = zip_ref.namelist()
 
             # Extract all files
-            print(f"Extracting {len(file_list)} files from {zip_path}...")
+            # print(f"Extracting {len(file_list)} files from {zip_path}...")
             zip_ref.extractall(path=extract_path)
-            print(f"Files extracted to {extract_path}")
+            # print(f"Files extracted to {extract_path}")
 
         # Delete ZIP file if requested
         if delete_zip:
             os.remove(zip_path)
-            print(f"Deleted original ZIP file: {zip_path}")
+            # print(f"Deleted original ZIP file: {zip_path}")
 
         return str(extract_path)
 

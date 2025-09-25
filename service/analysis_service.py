@@ -46,40 +46,6 @@ def read_xml_file(file_path):
         return None
 
 
-def parse_xml(xml_content):
-    """
-    XML 내용을 파싱하여 더 구조화된 형태로 반환합니다.
-
-    Args:
-        xml_content (str): XML 파일 내용
-
-    Returns:
-        dict: 파싱된 XML 데이터
-    """
-    try:
-        # XML 문자열에서 특수문자 처리
-        xml_content = xml_content.replace('&', '&amp;')
-
-        # XML 파싱
-        root = ET.fromstring(xml_content)
-
-        # 주요 섹션 추출 (예시)
-        data = {
-            'document_info': {},
-            'content': {}
-        }
-
-        # 추출된 데이터 반환
-        return data
-
-    except ET.ParseError as e:
-        print(f"XML 파싱 오류: {str(e)}")
-        # 파싱이 실패하면 원본 텍스트 그대로 반환
-        return {'raw_content': xml_content}
-    except Exception as e:
-        print(f"XML 처리 중 오류 발생: {str(e)}")
-        return None
-
 
 def convert_to_markdown(xml_data, prompt_template=None):
     """
@@ -118,7 +84,8 @@ def convert_to_markdown(xml_data, prompt_template=None):
         2. 공시 내용의 핵심을 간결하고 명확하게 요약할 것
         3. 주요 재무 데이터는 표 형식으로 정리할 것
         4. 공시의 중요 포인트를 강조할 것
-        5. 적절한 마크다운 형식(제목, 목록, 표, 코드 블록 등)을 사용하여 가독성 높게 구성할 것
+        5. 모든 내용이 포함될 것
+        6. 적절한 마크다운 형식(제목, 목록, 표, 코드 블록 등)을 사용하여 가독성 높게 구성할 것
 
         # XML 문서:
         ```xml
@@ -187,71 +154,6 @@ def save_markdown_file(markdown_content, source_xml_path, output_dir=None):
         return None
 
 
-def process_xml_directory(directory_path, output_dir=None, file_pattern="*.xml"):
-    """
-    특정 디렉토리의 모든 XML 파일을 처리하여 Markdown으로 변환합니다.
-
-    Args:
-        directory_path (str): XML 파일이 있는 디렉토리 경로
-        output_dir (str, optional): Markdown 파일을 저장할 디렉토리 경로
-        file_pattern (str, optional): 처리할 파일 패턴 (기본값: "*.xml")
-
-    Returns:
-        list: 변환된 모든 Markdown 파일 경로 목록
-    """
-    try:
-        # 디렉토리 경로를 Path 객체로 변환
-        dir_path = Path(directory_path)
-
-        # 디렉토리 존재 여부 확인
-        if not dir_path.exists() or not dir_path.is_dir():
-            raise NotADirectoryError(f"디렉토리를 찾을 수 없습니다: {directory_path}")
-
-        # 출력 디렉토리 설정
-        if output_dir is None:
-            # 기본값으로 원본 XML과 같은 디렉토리 사용
-            output_directory = dir_path
-        else:
-            output_directory = Path(output_dir)
-            # 디렉토리가 없으면 생성
-            if not output_directory.exists():
-                output_directory.mkdir(parents=True, exist_ok=True)
-
-        # XML 파일 목록 가져오기
-        xml_files = list(dir_path.glob(file_pattern))
-        if not xml_files:
-            print(f"디렉토리에서 XML 파일을 찾을 수 없습니다: {directory_path}")
-            return []
-
-        print(f"{len(xml_files)}개의 XML 파일을 찾았습니다.")
-
-        # 결과 파일 경로를 저장할 리스트
-        markdown_files = []
-
-        # 각 XML 파일 처리
-        for xml_file in xml_files:
-            print(f"처리 중: {xml_file.name}")
-
-            # XML 파일 읽기
-            xml_content = read_xml_file(xml_file)
-            if xml_content is None:
-                continue
-
-            # Markdown으로 변환
-            markdown_content = convert_to_markdown({'raw_content': xml_content})
-
-            # Markdown 파일 저장
-            md_path = save_markdown_file(markdown_content, xml_file, output_directory)
-            if md_path:
-                markdown_files.append(md_path)
-
-        return markdown_files
-
-    except Exception as e:
-        print(f"디렉토리 처리 중 오류 발생: {str(e)}")
-        return []
-
-
 def xml_to_markdown(xml_path, output_dir=None):
     """
     단일 XML 파일 또는 디렉토리의 XML 파일들을 Markdown으로 변환합니다.
@@ -267,12 +169,8 @@ def xml_to_markdown(xml_path, output_dir=None):
         # 입력 경로를 Path 객체로 변환
         path = Path(xml_path)
 
-        # 경로가 디렉토리인 경우
-        if path.is_dir():
-            return process_xml_directory(xml_path, output_dir)
-
         # 경로가 파일인 경우
-        elif path.is_file() and path.suffix.lower() == '.xml':
+        if path.is_file() and path.suffix.lower() == '.xml':
             xml_content = read_xml_file(path)
             if xml_content is None:
                 return None

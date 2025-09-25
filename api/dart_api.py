@@ -249,7 +249,7 @@ def download_document(rcept_no, save_path=None):
                     if chunk:
                         f.write(chunk)
                         
-            print(f"Document successfully downloaded to: {save_path}")
+            # print(f"Document successfully downloaded to: {save_path}")
             return str(save_path)
         else:
             print(f"Failed to download document: HTTP {response.status_code}")

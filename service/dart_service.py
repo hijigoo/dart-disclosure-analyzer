@@ -104,7 +104,7 @@ def download_disclosure_document(rcept_no, download_dir=None, filename=None):
             # Create directory if it doesn't exist
             if not download_dir_path.exists():
                 download_dir_path.mkdir(parents=True, exist_ok=True)
-                print(f"Created download directory at {download_dir_path}")
+                # print(f"Created download directory at {download_dir_path}")
 
             # Combine directory and filename
             save_path = download_dir_path / filename
@@ -116,7 +116,7 @@ def download_disclosure_document(rcept_no, download_dir=None, filename=None):
             # Create directory if it doesn't exist
             if not download_dir_path.exists():
                 download_dir_path.mkdir(parents=True, exist_ok=True)
-                print(f"Created download directory at {download_dir_path}")
+                # print(f"Created download directory at {download_dir_path}")
 
             # Create default filename with receipt number
             default_filename = f"disclosure_{rcept_no}.zip"
@@ -130,7 +130,7 @@ def download_disclosure_document(rcept_no, download_dir=None, filename=None):
         result = download_document(rcept_no=rcept_no, save_path=save_path)
 
         if result:
-            print(f"Document downloaded successfully: {result}")
+            # print(f"Document downloaded successfully: {result}")
             return result
         else:
             print(f"Failed to download document for receipt number: {rcept_no}")
