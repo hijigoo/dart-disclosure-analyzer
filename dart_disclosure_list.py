@@ -9,7 +9,7 @@ Supervisory Service's DART system.
 import json
 from config.api_config import SAMSUNG_CORP_CODE
 from api import dart_api
-from service import dart_service
+from service import dart_service, analysis_service
 from utils import date_utils, display, csv_utils, file_utils
 
 def main():
@@ -68,14 +68,18 @@ def main():
 
         print(f"# 공시 다운로드 ")
         saved_path = dart_service.download_disclosure_document(rcept_no=rcept_no)
-        print(f" - path: {saved_path} ")
+        print(f" - path: {saved_path}\n")
 
         # 기본 사용법 (압축 해제 후 추출된 파일 위치 반환)
         print(f"# 공시 압축 해제 ")
         extracted_dir = file_utils.extract_zip_file(saved_path, delete_zip=True)
         xml_files = file_utils.list_extracted_files(extract_path=extracted_dir, extensions=['.xml'])
-        print(f" - path: {xml_files[0]} ")
+        print(f" - path: {xml_files[0]}\n")
 
+        print(f"# 공시 xml 파일을 markdown으로 변경 ")
+        xml_file_path = xml_files[0]
+        markdown_path = analysis_service.xml_to_markdown(xml_file_path)
+        print(f" - markdown path: {markdown_path}\n")
 
 
     except dart_api.DartAPIError as e:
