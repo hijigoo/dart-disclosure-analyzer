@@ -6,8 +6,10 @@ such as date range based fetching with optimized API calls.
 """
 
 import time
+import os
 from datetime import datetime, timedelta
-from api.dart_api import get_disclosure_list, DartAPIError
+from pathlib import Path
+from api.dart_api import get_disclosure_list, download_document, DartAPIError
 
 def get_disclosure_list_by_date_range(corp_code, start_date, end_date, page_count=100, pblntf_ty=None):
     """
@@ -76,3 +78,64 @@ def get_disclosure_list_by_date_range(corp_code, start_date, end_date, page_coun
 
     print(f"Total disclosures collected: {len(all_disclosures)}")
     return all_disclosures
+
+
+def download_disclosure_document(rcept_no, download_dir=None, filename=None):
+    """
+    Download disclosure document by receipt number with enhanced directory handling.
+    This is a service-layer wrapper around the dart_api.download_document function.
+
+    Args:
+        rcept_no: Receipt number of the disclosure to download
+        download_dir: Custom directory to save the document (optional)
+        filename: Custom filename for the downloaded document (optional)
+
+    Returns:
+        str: Path to the downloaded file or None if download failed
+    """
+    try:
+        # Create full save_path if both download_dir and filename are provided
+        save_path = None
+
+        if download_dir and filename:
+            # Create Path object for the download directory
+            download_dir_path = Path(download_dir)
+
+            # Create directory if it doesn't exist
+            if not download_dir_path.exists():
+                download_dir_path.mkdir(parents=True, exist_ok=True)
+                print(f"Created download directory at {download_dir_path}")
+
+            # Combine directory and filename
+            save_path = download_dir_path / filename
+
+        elif download_dir:
+            # If only directory is provided, let the API function handle the filename
+            download_dir_path = Path(download_dir)
+
+            # Create directory if it doesn't exist
+            if not download_dir_path.exists():
+                download_dir_path.mkdir(parents=True, exist_ok=True)
+                print(f"Created download directory at {download_dir_path}")
+
+            # Create default filename with receipt number
+            default_filename = f"disclosure_{rcept_no}.zip"
+            save_path = download_dir_path / default_filename
+
+        elif filename:
+            # If only filename is provided, use default directory
+            save_path = filename
+
+        # Call the API function to download the document
+        result = download_document(rcept_no=rcept_no, save_path=save_path)
+
+        if result:
+            print(f"Document downloaded successfully: {result}")
+            return result
+        else:
+            print(f"Failed to download document for receipt number: {rcept_no}")
+            return None
+
+    except Exception as e:
+        print(f"Error downloading disclosure document: {str(e)}")
+        return None
