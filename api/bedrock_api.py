@@ -8,10 +8,17 @@ AWS Bedrock API 호출 샘플 코드 (Claude 3 전용)
 import json
 import boto3
 import requests
+import sys
+import os
+from pathlib import Path
+
+# Add project root to path for imports
+sys.path.insert(0, str(Path(__file__).parent.parent))
+
 from config.api_config import (
-    AWS_REGION, 
-    AWS_BEARER_TOKEN_BEDROCK, 
-    ANTHROPIC_MODEL, 
+    AWS_REGION,
+    AWS_BEARER_TOKEN_BEDROCK,
+    ANTHROPIC_MODEL,
     ANTHROPIC_SMALL_FAST_MODEL
 )
 
