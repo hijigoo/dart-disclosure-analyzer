@@ -6,6 +6,7 @@ disclosure information for Samsung Electronics from the Korean Financial
 Supervisory Service's DART system.
 """
 
+from datetime import datetime
 import json
 from config.api_config import SAMSUNG_CORP_CODE
 from api import dart_api
@@ -26,12 +27,14 @@ def main():
             return
             
         # Fetch Samsung disclosures from the last 30 days
-        print("Fetching recent disclosures for Samsung Electronics...")
+        # print("Fetching recent disclosures for Samsung Electronics...")
 
         end_date = date_utils.get_current_date()  # Today
         # start_date = date_utils.get_january_first()  # Start Date
         start_date = '20250701'
 
+
+        print(f"# 공시 리스트 가져오기 - 날짜: {start_date}~{end_date}")
         disclosures = dart_service.get_disclosure_list_by_date_range(
             corp_code=SAMSUNG_CORP_CODE,
             start_date=start_date,
@@ -39,12 +42,17 @@ def main():
             page_count=100,
             pblntf_ty='I'
         )
+        print()
         
         # Display the results using the display module
+        print(f"# 공시 리스트 출력")
         display.display_recent_disclosures(disclosures)
+        print()
 
         # Download the results using the csv module
-        disc_list_file_path = csv_utils.save_disclosures_to_csv(disclosures=disclosures)
+        current_time = datetime.now().strftime("%Y%m%d")
+        filename = f"disclosures_{current_time}_{start_date}_{end_date}"
+        disc_list_file_path = csv_utils.save_disclosures_to_csv(disclosures=disclosures, filename=filename)
 
         # Get filtered row 
         filter_column_name = 'report_nm'

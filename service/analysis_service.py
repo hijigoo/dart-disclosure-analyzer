@@ -146,7 +146,7 @@ def save_markdown_file(markdown_content, source_xml_path, output_dir=None):
         with open(output_path, 'w', encoding='utf-8') as f:
             f.write(markdown_content)
 
-        print(f"Markdown 파일이 저장되었습니다: {output_path}")
+        # print(f"Markdown 파일이 저장되었습니다: {output_path}")
         return str(output_path)
 
     except Exception as e:

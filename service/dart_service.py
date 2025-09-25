@@ -49,7 +49,7 @@ def get_disclosure_list_by_date_range(corp_code, start_date, end_date, page_coun
 
         try:
             # Fetch disclosures for this specific week
-            print(f"Fetching disclosures for week {week_start_str} to {week_end_str}...")
+            print(f" - Fetching disclosures for week {week_start_str} to {week_end_str}...")
 
             weekly_disclosures = get_disclosure_list(
                 corp_code=corp_code,
@@ -61,17 +61,19 @@ def get_disclosure_list_by_date_range(corp_code, start_date, end_date, page_coun
 
             # If we got any results, add them to our collection
             if weekly_disclosures:
-                print(f"Found {len(weekly_disclosures)} disclosures for week {week_start_str} to {week_end_str}")
+                # print(f"Found {len(weekly_disclosures)} disclosures for week {week_start_str} to {week_end_str}")
                 all_disclosures.extend(weekly_disclosures)
             else:
-                print(f"No disclosures found for week {week_start_str} to {week_end_str}")
+                # print(f"No disclosures found for week {week_start_str} to {week_end_str}")
+                pass
 
             # Add a small delay to avoid hitting API rate limits
             time.sleep(0.5)
 
         except DartAPIError as e:
-            print(f"Error fetching disclosures for week {week_start_str} to {week_end_str}: {str(e)}")
+            # print(f"Error fetching disclosures for week {week_start_str} to {week_end_str}: {str(e)}")
             # Continue to the next week even if there's an error
+            pass
 
         # Move to the next week
         current_dt += one_week

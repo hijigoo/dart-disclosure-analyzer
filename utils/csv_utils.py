@@ -49,7 +49,8 @@ def save_disclosures_to_csv(disclosures, filename=None):
 
     # Generate a default filename if not provided
     if not filename:
-        current_time = datetime.now().strftime("%Y%m%d_%H%M%S")
+        # current_time = datetime.now().strftime("%Y%m%d_%H%M%S")
+        current_time = datetime.now().strftime("%Y%m%d")
         filename = f"disclosures_{current_time}"
 
     # Create the full file path
@@ -66,7 +67,7 @@ def save_disclosures_to_csv(disclosures, filename=None):
             for disclosure in disclosures:
                 writer.writerow(disclosure)
 
-        print(f"Successfully saved {len(disclosures)} disclosures to {file_path}")
+        # print(f"Successfully saved {len(disclosures)} disclosures to {file_path}")
         return str(file_path)
 
     except Exception as e:
@@ -128,7 +129,7 @@ def read_csv_filter_to_json(file_path, column_name, keyword):
             "matched_rows": len(filtered_rows)
         }
 
-        print(f"Found {len(filtered_rows)} matching rows out of {total_rows} total rows")
+        # print(f"Found {len(filtered_rows)} matching rows out of {total_rows} total rows")
         return result
 
     except Exception as e:

@@ -50,11 +50,11 @@ def validate_api_key():
         # Print the API key being used (first few and last few characters)
         key_start = API_KEY[:4] 
         key_end = API_KEY[-4:]
-        print(f"Using API key: {key_start}...{key_end}")
+        # print(f"Using API key: {key_start}...{key_end}")
         
         # Try a simple API request to validate the key
         response = requests.get(url, params=params, timeout=10)
-        print(f"API response status code: {response.status_code}")
+        # print(f"API response status code: {response.status_code}")
         
         if response.status_code == 200:
             # The corpCode.xml endpoint returns XML data, not JSON
@@ -97,7 +97,7 @@ def get_disclosure_list(corp_code, start_date=20250901, end_date=20250931, page_
     if pblntf_ty:
         params['pblntf_ty'] = pblntf_ty
 
-    print(f"Fetching disclosures from {start_date} to {end_date}...")
+    # print(f"Fetching disclosures from {start_date} to {end_date}...")
     
     response = requests.get(url, params=params, timeout=10)
     
