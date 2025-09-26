@@ -1,209 +1,165 @@
-# DART 공시정보 조회 프로그램
+# DART 공시정보 멀티에이전트 분석 시스템
 
-이 프로그램은 DART(전자공시시스템) API를 활용하여 기업의 공시정보를 조회하는 Python 스크립트입니다.
+LangGraph 기반의 멀티에이전트 아키텍처를 활용하여 한국 금융감독원 DART(전자공시시스템)의 기업 공시정보를 자동으로 수집, 분석, 요약하는 고급 AI 시스템입니다.
 
-## 소개
+## 주요 특징
 
-이 프로젝트는 OpenDART API를 통해 기업의 다음과 같은 정보를 조회합니다:
+- **멀티에이전트 아키텍처**: LangGraph와 LangChain을 기반으로 한 협업형 AI 에이전트 시스템
+- **자동화된 공시 수집**: DART API를 통해 지정된 기간과 기업의 공시 문서를 자동으로 검색 및 수집
+- **공시 문서 변환**: XML 형식의 원본 공시를 구조화된 마크다운으로 변환하여 가독성 향상
+- **지능형 분석**: Claude 3 Sonnet 모델을 활용한 고품질 자연어 이해 및 요약
+- **대화형 인터페이스**: 사용자와 대화를 통해 원하는 정보를 쉽게 제공
 
-1. 최근 공시 목록
-2. 상세 공시 정보
-3. 재무 하이라이트
+## 에이전트 구조
 
-## 클래스 다이어그램
+이 시스템은 다음과 같은 협업 에이전트들로 구성되어 있습니다:
 
-- 프로젝트가 발전함에 따라 향후 추가 예정
+1. **오케스트레이터 에이전트 (disclosure_agent.py)**
+   - 사용자 요청을 이해하고 작업을 조율
+   - 다른 특수 에이전트들에게 작업을 할당하고 결과를 종합
+   - LangGraph의 상태 관리를 통한 복잡한 워크플로우 처리
+
+2. **문서 검색 및 다운로드 에이전트**
+   - `search_and_download_disclosure` 도구를 통해 DART API에 접근
+   - 특정 기간, 기업코드, 키워드 기반으로 관련 공시 검색
+   - 공시 문서를 다운로드하고 압축 해제하여 XML 파일 제공
+
+3. **문서 변환 에이전트**
+   - `convert_xml_to_markdown` 도구를 통해 XML 문서를 마크다운으로 변환
+   - Claude 3 모델을 활용한 지능형 문서 구조화 및 포맷팅
+   - 중요 정보 강조 및 표 형식 정리
+
+4. **파일 관리 에이전트**
+   - `read_file_content` 도구로 파일 내용 읽기
+   - `save_file_content` 도구로 처리된 내용을 파일로 저장
+   - 디렉토리 생성 및 파일 경로 관리
+
+## 워크플로우
+
+이 시스템의 기본 워크플로우는 다음과 같습니다:
+
+```
+사용자 요청
+   ↓
+오케스트레이터 에이전트 (요청 해석)
+   ↓
+문서 검색 및 다운로드 에이전트 (공시 검색 및 다운로드)
+   ↓
+문서 변환 에이전트 (XML → 마크다운 변환)
+   ↓
+파일 관리 에이전트 (결과 저장)
+   ↓
+오케스트레이터 에이전트 (최종 응답 생성)
+   ↓
+사용자에게 결과 제공
+```
+
+## 설치 요구사항
+
+- Python 3.8 이상
+- LangChain, LangGraph 라이브러리
+- Anthropic API 키 (Claude 3.5 Sonnet 사용)
+- DART OpenAPI 키
+- AWS 계정 (Bedrock API 사용 시)
 
 ## 설치 방법
 
-### 필수 요구사항
-
-- Python 3.6 이상
-- requests 라이브러리
-- langchain 라이브러리
-- boto3 (AWS Bedrock API 연동용)
-- zipfile (공시 문서 압축 해제용)
-
-### 설치
-
-#### 가상환경 사용 (권장)
-
-1. 이 저장소를 클론하거나 다운로드합니다.
-2. 가상환경을 생성하고 활성화합니다:
-
+1. 저장소 클론 또는 다운로드:
 ```bash
-# 가상환경 생성
-python3 -m venv .venv
-
-# 가상환경 활성화 (Linux/Mac)
-source .venv/bin/activate
-
-# 가상환경 활성화 (Windows)
-.venv\Scripts\activate
+git clone https://github.com/yourusername/dart-disclosure-analyzer.git
+cd dart-disclosure-analyzer
 ```
 
-3. 필요한 패키지를 설치합니다:
+2. 가상환경 생성 및 활성화:
+```bash
+python -m venv .venv
+source .venv/bin/activate  # Linux/Mac
+# 또는
+.venv\Scripts\activate  # Windows
+```
 
+3. 필요 패키지 설치:
 ```bash
 pip install -r requirements.txt
 ```
 
-#### 전역 설치
+4. 환경 설정:
+   - `config/api_config.py`에 필요한 API 키 설정
+   - ANTHROPIC_API_KEY와 DART_API_KEY 설정 필요
 
-필요한 패키지를 전역으로 설치:
+## 사용 방법
 
-```bash
-pip install requests
-```
-
-## 파일 구성
-
-### 패키지 구조
-```
-.
-├── api/                          # API 관련 모듈
-│   ├── __init__.py              # 패키지 초기화 파일
-│   ├── bedrock_api.py           # AWS Bedrock API 연동 기능
-│   ├── dart_api.py              # DART API 호출 기본 함수
-│   ├── document_downloader.py   # 공시 문서 다운로드 기능
-│   └── report_period.py         # 보고서 기간 관리 기능
-│
-├── config/                       # 설정 관련 모듈
-│   ├── __init__.py              # 패키지 초기화 파일
-│   └── api_config.py            # API 키와 회사 코드 설정
-│
-├── service/                      # 서비스 계층 모듈
-│   ├── __init__.py              # 패키지 초기화 파일
-│   ├── analysis_service.py      # 공시 문서 분석 및 변환 서비스
-│   └── dart_service.py          # DART API 서비스 래퍼 기능
-│
-├── utils/                        # 유틸리티 모듈
-│   ├── __init__.py              # 패키지 초기화 파일
-│   ├── csv_utils.py             # CSV 파일 처리 유틸리티
-│   ├── date_utils.py            # 날짜 처리 유틸리티
-│   ├── display.py               # 데이터 표시 및 포맷팅 함수
-│   └── file_utils.py            # 파일 및 압축 처리 유틸리티
-│
-├── download/                     # 다운로드된 파일 저장 폴더
-│
-├── data/                         # 데이터 저장 폴더
-│
-├── dart_disclosure_details.py    # 재무제표 정보 조회 메인 스크립트
-└── dart_disclosure_list.py       # 공시 목록 조회 메인 스크립트
-```
-
-### 주요 파일
-- `dart_disclosure_details.py`: 기업의 재무제표 정보를 조회합니다.
-- `dart_disclosure_list.py`: 기업의 최근 공시 목록을 조회하고, 원하는 공시의 원본 문서를 다운로드 및 분석합니다.
-- `api/bedrock_api.py`: AWS Bedrock을 통해 Claude 모델을 활용하는 기능을 제공합니다.
-- `service/analysis_service.py`: 공시 XML 문서를 읽고 Markdown으로 변환하는 기능을 제공합니다.
-- `utils/file_utils.py`: ZIP 파일 압축 해제 및 파일 처리 유틸리티 함수를 제공합니다.
-
-## 실행 방법
-
-### 가상환경 사용 (권장)
-
-먼저 가상환경을 활성화합니다:
+### 기본 실행
 
 ```bash
-# Linux/Mac
-source .venv/bin/activate
-
-# Windows
-.venv\Scripts\activate
+cd agents/disclosure_agent
+python disclosure_agent.py
 ```
 
-### 최근 공시 목록 조회
+### 대화 예시
 
-다음 명령을 실행하여 기업의 최근 30일간 공시 목록을 조회할 수 있습니다:
+사용자: "삼성전자의 2025년 7월부터 9월까지 공급체결 공시정보 알려줘"
 
-```bash
-# 가상환경 활성화 상태에서
-python dart_disclosure_list.py
+시스템:
+1. 해당 기간의 공시 정보 검색 및 다운로드
+2. XML 파일 분석 및 마크다운으로 변환
+3. 주요 내용 요약 및 제공
 
-# 또는 가상환경 활성화 없이
-.venv/bin/python dart_disclosure_list.py  # Linux/Mac
-.venv\Scripts\python dart_disclosure_list.py  # Windows
-```
+## 도구 (Tools)
 
-### 재무 하이라이트 조회
+이 에이전트 시스템은 다음과 같은 도구들을 사용합니다:
 
-다음 명령을 실행하여 기업의 최근 분기 또는 연간 보고서의 재무 하이라이트를 조회할 수 있습니다:
+1. **search_and_download_disclosure**
+   - 특정 기간과 기업의 공시 문서 검색 및 다운로드
+   - 매개변수: start_date, end_date, corp_code, filter_keyword
 
-```bash
-# 가상환경 활성화 상태에서
-python dart_disclosure_details.py
+2. **convert_xml_to_markdown**
+   - XML 공시 문서를 마크다운으로 변환
+   - 매개변수: file_path (XML 파일 경로)
 
-# 또는 가상환경 활성화 없이
-.venv/bin/python dart_disclosure_details.py  # Linux/Mac
-.venv\Scripts\python dart_disclosure_details.py  # Windows
-```
+3. **read_file_content**
+   - 파일 내용 읽기
+   - 매개변수: file_path (읽을 파일 경로)
 
-## 주요 기능
+4. **save_file_content**
+   - 콘텐츠를 파일로 저장
+   - 매개변수: file_path (저장 경로), content (저장할 내용)
 
-### dart_disclosure_list.py
+## 시스템 프롬프트
 
-- 기업의 특정 기간 공시 정보를 조회합니다.
-- 각 공시의 제목, 접수일자, 보고서 번호, 상세 URL을 표시합니다.
-- 특정 키워드(예: "공급")가 포함된 공시를 필터링합니다.
-- 가장 최신 공시를 CSV 파일로 저장합니다.
-- 공시 원본 문서를 다운로드하고 압축을 해제합니다.
-- XML 형식의 공시 문서를 Markdown 형식으로 변환하여 가독성을 높입니다.
+에이전트는 `prompt.md` 파일에서 로드된 시스템 메시지를 사용합니다. 이 프롬프트는:
 
-### dart_disclosure_details.py
+1. 공시 정보 수집 및 가공의 목적 설명
+2. 주요 작업 단계 정의 (다운로드, 추출, 변환, 저장, 출력)
+3. 마크다운 변환 요구사항 지정
+4. 투자 관점에서의 정보 정리 지침 제공
 
-- 현재 날짜를 기준으로 가장 최근의 분기 또는 연간 보고서를 자동으로 선택합니다.
-- 선택된 보고서에서 주요 재무 정보(매출, 순이익, 자산, 부채, 자본)를 추출하여 표시합니다.
+## 확장 및 커스터마이징
 
-### analysis_service.py
+1. **새로운 도구 추가**
+   - `tools` 디렉토리에 새로운 도구 함수 구현
+   - `disclosure_agent.py`에 도구 등록 및 바인딩
 
-- 공시 XML 문서를 읽고 AWS Bedrock API의 Claude 모델을 활용하여 분석합니다.
-- 분석 결과를 가독성 높은 Markdown 형식으로 변환합니다.
-- 단일 XML 파일 또는 디렉토리 전체의 XML 파일을 일괄 처리할 수 있습니다.
+2. **프롬프트 수정**
+   - `prompt.md` 파일을 편집하여 에이전트의 동작 방식 조정
 
-## API 키 관리
+3. **모델 변경**
+   - 다른 LLM 모델을 사용하려면 `disclosure_agent.py`의 모델 설정 부분 수정
 
-- API 키는 `config/api_config.py` 파일에 저장됩니다.
-- OpenDART API 키와 AWS Bedrock API 키를 모두 관리합니다.
-- 실제 프로덕션 환경에서는 환경 변수나 보안 저장소를 사용하여 API 키를 관리하는 것이 좋습니다.
+## 주의사항
 
-## 참고사항
+- DART API는 일일 요청 한도가 있으므로 과도한 사용에 주의
+- API 키를 안전하게 관리하고 소스코드에 직접 포함하지 말 것
+- 대용량 XML 문서 처리 시 메모리 사용량에 주의
 
-- OpenDART API에 대한 자세한 정보는 [OpenDART 웹사이트](https://opendart.fss.or.kr)에서 확인할 수 있습니다.
-- 이 프로그램은 OpenDART API의 일일 사용 한도 내에서 사용해야 합니다.
-- AWS Bedrock API는 별도의 AWS 계정이 필요하며, API 키와 리전 설정이 필요합니다.
-- XML 문서 분석에는 Claude 3 모델을 사용하여 높은 품질의 Markdown 변환을 제공합니다.
+## 기여 방법
 
-### 회사 고유번호 조회
+1. Fork 저장소
+2. 기능 브랜치 생성 (`git checkout -b feature/amazing-feature`)
+3. 변경사항 커밋 (`git commit -m 'Add some amazing feature'`)
+4. 브랜치에 푸시 (`git push origin feature/amazing-feature`)
+5. Pull Request 생성
 
-OpenDART API는 종목코드가 아닌 8자리 고유번호를 사용합니다. 회사 고유번호를 조회하려면 다음과 같이 실행하세요:
+## 라이선스
 
-```bash
-# 가상환경 활성화 상태에서
-python get_company_codes.py
-
-# 또는 가상환경 활성화 없이
-.venv/bin/python get_company_codes.py  # Linux/Mac
-.venv\Scripts\python get_company_codes.py  # Windows
-```
-
-이 스크립트는 OpenDART API에서 모든 회사의 고유번호 목록을 다운로드하고 해당 기업의 고유번호를 찾아 표시합니다.
-
-## 공시 문서 분석 및 변환
-
-XML 형식의 공시 문서를 읽고 Markdown으로 변환하는 기능을 사용하려면:
-
-```python
-from service import analysis_service
-
-# 단일 XML 파일 변환
-markdown_path = analysis_service.xml_to_markdown("path/to/disclosure.xml")
-
-# 특정 디렉토리의 모든 XML 파일 변환
-markdown_paths = analysis_service.xml_to_markdown("path/to/directory/with/xmls")
-
-# 출력 디렉토리 지정
-markdown_path = analysis_service.xml_to_markdown("path/to/disclosure.xml", output_dir="path/to/output")
-```
-
-변환된 Markdown 파일은 원본 XML과 동일한 이름(확장자만 .md로 변경)으로 저장됩니다.
+이 프로젝트는 MIT 라이선스로 배포됩니다. 자세한 내용은 LICENSE 파일을 참조하세요.
