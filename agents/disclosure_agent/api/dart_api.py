@@ -1,17 +1,8 @@
-import requests
-import json
-import time
 import os
-import sys
+import requests
+import time
 from pathlib import Path
-from datetime import datetime, timedelta
-
-# Add parent directory to path to enable relative imports
-parent_dir = Path(__file__).parent.parent
-if str(parent_dir) not in sys.path:
-    sys.path.append(str(parent_dir))
-
-from utils import date_utils
+from agents.disclosure_agent.utils.path_utils import ensure_download_directory
 from config.api_config import API_KEY
 
 # OpenDART API status codes
@@ -27,16 +18,12 @@ DART_STATUS_CODES = {
 }
 
 
-# DART report code mappings (now imported from report_period module)
-from api.report_period import REPORT_CODE_MAP
-
 # Base URL for all API calls
 BASE_URL = 'https://opendart.fss.or.kr/api'
 
 class DartAPIError(Exception):
     """Custom exception for OpenDART API errors"""
     pass
-
 
 # 고유번호 개발가이드
 # https://opendart.fss.or.kr/guide/detail.do?apiGrpCd=DS001&apiId=2019018
@@ -224,7 +211,7 @@ def download_document(rcept_no, save_path=None):
     Returns:
         Path to the saved file or None if download failed
     """
-    from api.document_downloader import get_downloads_folder
+
     url = f'{BASE_URL}/document.xml'
     
     params = {
@@ -238,14 +225,14 @@ def download_document(rcept_no, save_path=None):
         if response.status_code == 200:
             # Create a default filename if not provided
             if not save_path:
-                download_dir = get_downloads_folder()
+                download_dir = ensure_download_directory()
                 filename = f"disclosure_{rcept_no}.zip"
                 save_path = download_dir / filename
             else:
                 # If save_path is provided but it's just a filename, add Downloads path
                 save_path = Path(save_path)
                 if not save_path.is_absolute():
-                    save_path = get_downloads_folder() / save_path
+                    save_path = ensure_download_directory() / save_path
             
             # Create parent directories if they don't exist
             save_path.parent.mkdir(parents=True, exist_ok=True)

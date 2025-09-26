@@ -8,22 +8,12 @@ Supervisory Service's DART system.
 
 from datetime import datetime
 import json
-import sys
-import os
-from pathlib import Path
-
-# Add directory to path if needed
-current_dir = Path(__file__).parent
-if str(current_dir) not in sys.path:
-    sys.path.append(str(current_dir))
-
-# Import modules
 from config.api_config import SAMSUNG_CORP_CODE
 from api import dart_api
 from service import dart_service, analysis_service
 from utils import date_utils, display, csv_utils, file_utils
 
-def main():
+def find_and_download_disclosure(start_date, end_date, filter_keyword='공급'):
     """
     Main function to demonstrate Samsung Electronics disclosure retrieval
     """
@@ -39,9 +29,9 @@ def main():
         # Fetch Samsung disclosures from the last 30 days
         # print("Fetching recent disclosures for Samsung Electronics...")
 
-        end_date = date_utils.get_current_date()  # Today
+        # end_date = date_utils.get_current_date()  # Today
         # start_date = date_utils.get_january_first()  # Start Date
-        start_date = '20250701'
+        # start_date = '20250701'
 
 
         print(f"# 공시 리스트 가져오기 - 날짜: {start_date}~{end_date}")
@@ -66,7 +56,7 @@ def main():
 
         # Get filtered row 
         filter_column_name = 'report_nm'
-        filter_keyword = '공급'
+        # filter_keyword = '공급'
         filtered_disc=csv_utils.read_csv_filter_to_json(
             file_path=disc_list_file_path,
             column_name=filter_column_name,
@@ -106,4 +96,6 @@ def main():
         print(f'Error: {e}')
 
 if __name__ == "__main__":
-    main()
+    end_date = date_utils.get_current_date()  # Today
+    start_date = '20250701'
+    find_and_download_disclosure(start_date=start_date, end_date=end_date)
