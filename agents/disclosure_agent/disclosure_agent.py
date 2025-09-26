@@ -1,25 +1,14 @@
-import os
-import sys
 from pathlib import Path
-
 from langchain_core.tools import tool
 from langgraph.graph import StateGraph, START, END
 from langgraph.graph import MessagesState
 from langchain_core.messages import SystemMessage, HumanMessage, ToolMessage
-
-# Add the project root to sys.path
-sys.path.append(str(Path(__file__).parent.parent.parent))
 from agents.disclosure_agent.tools import disclosure_tool
-
 from langchain_anthropic import ChatAnthropic
+from config.api_config import ANTHROPIC_API_KEY
 
 # LLM Model 세팅
-# API 키는 환경 변수나 설정 파일로부터 로드해야 합니다.
-# 실제 운영 환경에서는 getpass를 사용하지 않는 것이 좋습니다.
-
-# API 키가 설정되어 있다고 가정
-api_key = os.environ.get("ANTHROPIC_API_KEY", "dummy_key_for_testing")
-llm = ChatAnthropic(model="claude-3-5-sonnet-latest", api_key=api_key)
+llm = ChatAnthropic(model="claude-3-5-sonnet-latest", api_key=ANTHROPIC_API_KEY)
 
 
 # Tool 정의
@@ -35,13 +24,42 @@ def search_and_download_disclosure(start_date, end_date, corp_code, filter_keywo
         filter_keyword: Keyword to filter results
 
     Returns:
-        Dict containing search results and download information
+        다운로드 받은 공시 xml 파일을 json 형태로 반환합니다.
     """
     return disclosure_tool.search_and_download_disclosure(start_date=start_date, end_date=end_date, corp_code=corp_code, filter_keyword=filter_keyword)
 
 
+@tool
+def read_file_content(file_path: str) -> str:
+    """
+    파일 경로를 입력받아 파일의 전체 내용을 텍스트로 읽어옵니다.
+
+    Args:
+        file_path: 파일 경로
+
+    Returns:
+        주어진 파일 경로(file_path)에 있는 텍스트 파일의 내용을 읽어서 반환합니다.
+    """
+    return disclosure_tool.read_file_content(file_path)
+
+
+@tool
+def save_file_content(file_path: str, content: str) -> str:
+    """
+    지정된 경로에 파일을 저장합니다.
+
+    Args:
+        file_path: 저장할 파일의 경로
+        content: 저장할 파일의 내용 텍스트
+
+    Returns:
+        저장 성공 여부 메시지를 반환합니다.
+    """
+    return disclosure_tool.save_file_content(file_path, content)
+
+
 # Tool 로 LLM의 기능 확장
-tools = [search_and_download_disclosure]
+tools = [search_and_download_disclosure, read_file_content, save_file_content]
 tools_by_name = {tool.name: tool for tool in tools}
 llm_with_tools = llm.bind_tools(tools)
 
@@ -128,10 +146,9 @@ if __name__ == "__main__":
     print("Agent graph compiled successfully.")
 
     # Invoke
-    messages = [HumanMessage(content="Add 3 and 4.")]
+    messages = [HumanMessage(content="삼성전자의 2025년 7월 부터 9월까지 공급체결 공시정보 알려줘")]
     messages = agent.invoke({"messages": messages})
     for m in messages["messages"]:
+        print("\n--- 최종 실행 결과 ---\n")
         m.pretty_print()
-
-        print("\n--- 최종 실행 결과 ---")
-        print("실행 완료")
+    print("\n\n--- 실행 완료 ---")

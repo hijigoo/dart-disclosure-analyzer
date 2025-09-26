@@ -8,6 +8,7 @@ Supervisory Service's DART system.
 
 from datetime import datetime
 import json
+from pathlib import Path
 from config.api_config import SAMSUNG_CORP_CODE
 from api import dart_api
 from service import dart_service, analysis_service
@@ -80,15 +81,51 @@ def search_and_download_disclosure(start_date, end_date, corp_code, filter_keywo
         # xml_file_path = xml_files[0]
         # markdown_path = analysis_service.xml_to_markdown(xml_file_path)
         # print(f" - markdown path: {markdown_path}\n")
-
-        return xml_files[0]
+        xml_path = xml_files[0]
+        
+        print(f"✅ [Tool 1 Success] XML file downloaded at: {xml_path}")
+        return {"xml_path": xml_path}
         
     except dart_api.DartAPIError as e:
         print(f'API Error: {e}')
     except Exception as e:
         print(f'Error: {e}')
 
-if __name__ == "__main__":
-    end_date = date_utils.get_current_date()  # Today
-    start_date = '20250701'
-    search_and_download_disclosure(start_date=start_date, end_date=end_date, corp_code=SAMSUNG_CORP_CODE)
+def read_file_content(file_path: str) -> str:
+    """
+    주어진 파일 경로(file_path)에 있는 텍스트 파일의 내용을 읽어서 반환합니다.
+    """
+    try:
+        with open(file_path, 'r', encoding='utf-8') as f:
+            content = f.read()
+        print(f"✅ [Tool 2 Success] Successfully read file: {file_path}")
+        return content
+    except Exception as e:
+        error_message = f"🔥 Error reading file at {file_path}: {e}"
+        print(error_message)
+        return error_message
+
+
+def save_file_content(file_path: str, content: str) -> str:
+    """
+    주어진 내용(content)을 지정된 파일 경로(file_path)에 저장합니다.
+    """
+    try:
+        # 파일의 디렉토리가 존재하는지 확인하고, 없으면 생성합니다.
+        directory = Path(file_path).parent
+        if not directory.exists():
+            directory.mkdir(parents=True, exist_ok=True)
+
+        with open(file_path, 'w', encoding='utf-8') as f:
+            f.write(content)
+        print(f"✅ [Tool 3 Success] Successfully saved content to file: {file_path}")
+        return f"성공적으로 파일에 내용을 저장했습니다: {file_path}"
+    except Exception as e:
+        error_message = f"🔥 Error saving content to file at {file_path}: {e}"
+        print(error_message)
+        return error_message
+    
+# if __name__ == "__main__":
+#     end_date = date_utils.get_current_date()  # Today
+#     start_date = '20250701'
+#     search_and_download_disclosure(start_date=start_date, end_date=end_date, corp_code=SAMSUNG_CORP_CODE)
