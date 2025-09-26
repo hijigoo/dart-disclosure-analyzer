@@ -13,30 +13,22 @@ from api import dart_api
 from service import dart_service, analysis_service
 from utils import date_utils, display, csv_utils, file_utils
 
-def find_and_download_disclosure(start_date, end_date, filter_keyword='공급'):
+def search_and_download_disclosure(start_date, end_date, corp_code, filter_keyword='공급'):
     """
     Main function to demonstrate Samsung Electronics disclosure retrieval
     """
     try:
-        print("==== Samsung Electronics DART Disclosure Tool ====\n")
+        print("==== Run DART Disclosure Tool ====\n")
         
         # Validate API key first
         if not dart_api.validate_api_key():
             print("ERROR: Invalid API key or API service unavailable")
             print("Please check your API key in api_config.py")
             return
-            
-        # Fetch Samsung disclosures from the last 30 days
-        # print("Fetching recent disclosures for Samsung Electronics...")
-
-        # end_date = date_utils.get_current_date()  # Today
-        # start_date = date_utils.get_january_first()  # Start Date
-        # start_date = '20250701'
-
 
         print(f"# 공시 리스트 가져오기 - 날짜: {start_date}~{end_date}")
         disclosures = dart_service.get_disclosure_list_by_date_range(
-            corp_code=SAMSUNG_CORP_CODE,
+            corp_code=corp_code,
             start_date=start_date,
             end_date=end_date,
             page_count=100,
@@ -84,12 +76,13 @@ def find_and_download_disclosure(start_date, end_date, filter_keyword='공급'):
         xml_files = file_utils.list_extracted_files(extract_path=extracted_dir, extensions=['.xml'])
         print(f" - path: {xml_files[0]}\n")
 
-        print(f"# 공시 xml 파일을 markdown으로 변경 ")
-        xml_file_path = xml_files[0]
-        markdown_path = analysis_service.xml_to_markdown(xml_file_path)
-        print(f" - markdown path: {markdown_path}\n")
+        # print(f"# 공시 xml 파일을 markdown으로 변경 ")
+        # xml_file_path = xml_files[0]
+        # markdown_path = analysis_service.xml_to_markdown(xml_file_path)
+        # print(f" - markdown path: {markdown_path}\n")
 
-
+        return xml_files[0]
+        
     except dart_api.DartAPIError as e:
         print(f'API Error: {e}')
     except Exception as e:
@@ -98,4 +91,4 @@ def find_and_download_disclosure(start_date, end_date, filter_keyword='공급'):
 if __name__ == "__main__":
     end_date = date_utils.get_current_date()  # Today
     start_date = '20250701'
-    find_and_download_disclosure(start_date=start_date, end_date=end_date)
+    search_and_download_disclosure(start_date=start_date, end_date=end_date, corp_code=SAMSUNG_CORP_CODE)
