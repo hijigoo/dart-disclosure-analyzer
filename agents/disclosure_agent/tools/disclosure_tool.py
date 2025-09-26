@@ -77,14 +77,22 @@ def search_and_download_disclosure(start_date, end_date, corp_code, filter_keywo
         xml_files = file_utils.list_extracted_files(extract_path=extracted_dir, extensions=['.xml'])
         print(f" - path: {xml_files[0]}\n")
 
-        # print(f"# 공시 xml 파일을 markdown으로 변경 ")
-        # xml_file_path = xml_files[0]
-        # markdown_path = analysis_service.xml_to_markdown(xml_file_path)
-        # print(f" - markdown path: {markdown_path}\n")
+        print(f"# 공시 xml 파일을 markdown으로 변경")
         xml_path = xml_files[0]
+        markdown_content = analysis_service.convert_to_markdown({'raw_content': read_file_content(xml_path)['content']})
+
+        # 마크다운 파일 경로 생성 및 저장
+        markdown_path = xml_path.replace('.xml', '.md')
+        save_file_content(markdown_path, markdown_content)
+
+        print(f" - XML path: {xml_path}")
+        print(f" - Markdown path: {markdown_path}\n")
         
         print(f"✅ [Tool 1 Success] XML file downloaded at: {xml_path}")
-        return {"xml_path": xml_path}
+        return {
+            "xml_path": xml_path,
+            "markdown_path": markdown_path
+        }
         
     except dart_api.DartAPIError as e:
         print(f'API Error: {e}')
@@ -99,7 +107,7 @@ def read_file_content(file_path: str) -> str:
         with open(file_path, 'r', encoding='utf-8') as f:
             content = f.read()
         print(f"✅ [Tool 2 Success] Successfully read file: {file_path}")
-        return content
+        return {"content": content}
     except Exception as e:
         error_message = f"🔥 Error reading file at {file_path}: {e}"
         print(error_message)
@@ -119,7 +127,7 @@ def save_file_content(file_path: str, content: str) -> str:
         with open(file_path, 'w', encoding='utf-8') as f:
             f.write(content)
         print(f"✅ [Tool 3 Success] Successfully saved content to file: {file_path}")
-        return f"성공적으로 파일에 내용을 저장했습니다: {file_path}"
+        return {"file_path": file_path}
     except Exception as e:
         error_message = f"🔥 Error saving content to file at {file_path}: {e}"
         print(error_message)
