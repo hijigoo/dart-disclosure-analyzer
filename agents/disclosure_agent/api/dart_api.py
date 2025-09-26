@@ -2,8 +2,15 @@ import requests
 import json
 import time
 import os
+import sys
 from pathlib import Path
 from datetime import datetime, timedelta
+
+# Add parent directory to path to enable relative imports
+parent_dir = Path(__file__).parent.parent
+if str(parent_dir) not in sys.path:
+    sys.path.append(str(parent_dir))
+
 from utils import date_utils
 from config.api_config import API_KEY
 

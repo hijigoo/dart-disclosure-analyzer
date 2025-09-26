@@ -6,6 +6,15 @@ disclosure documents for Samsung Electronics from the Korean Financial
 Supervisory Service's DART system.
 """
 
+import sys
+import os
+from pathlib import Path
+
+# Add directory to path if needed
+current_dir = Path(__file__).parent
+if str(current_dir) not in sys.path:
+    sys.path.append(str(current_dir))
+
 from config.api_config import SAMSUNG_CORP_CODE
 from api import dart_api, report_period, document_downloader
 from utils import display

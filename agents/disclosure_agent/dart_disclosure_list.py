@@ -8,6 +8,16 @@ Supervisory Service's DART system.
 
 from datetime import datetime
 import json
+import sys
+import os
+from pathlib import Path
+
+# Add directory to path if needed
+current_dir = Path(__file__).parent
+if str(current_dir) not in sys.path:
+    sys.path.append(str(current_dir))
+
+# Import modules
 from config.api_config import SAMSUNG_CORP_CODE
 from api import dart_api
 from service import dart_service, analysis_service
